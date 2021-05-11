@@ -1,0 +1,32 @@
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  float: left;
+  margin: 0px 0.1rem;
+  text-transform: uppercase;
+  text-align: center;
+  width: fit-content;
+}
+
+.submenu {
+  display: none;
+  z-index: 1;
+  background-color: white;
+  color: black;
+}
+
+li:hover .submenu {
+  display: block;
+}
+
+.submenu-item,
+.label {
+  cursor: pointer;
+  padding: auto;
+  width: 100%;
+}
+.submenu-item:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+}
