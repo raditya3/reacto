@@ -1,1 +1,1 @@
-export * from './src/home/root-container';
+export * from './src/login/login-page';
