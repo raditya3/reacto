@@ -1,0 +1,14 @@
+$primary-color: #6402a1;
+.root-container {
+  width: 100%;
+  height: 100%;
+}
+
+.form-container {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  background-color: $primary-color;
+  border-radius: 2rem;
+  padding: 5rem;
+}

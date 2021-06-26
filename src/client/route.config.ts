@@ -5,7 +5,7 @@ export interface RouteConfig {
 
 export const routeConfig : Array<RouteConfig> = [
     {
-        path : '/test',
-        name: 'rootContainer',
+        path : '/login',
+        name: 'loginPage',
     },
 ]

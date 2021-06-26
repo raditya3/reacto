@@ -1,13 +1,12 @@
 import { set, get, keys, trim, includes } from "lodash";
 import { Link, Redirect } from "react-router-dom";
-import FormBuilder from "./component-library/form-buillder/form-builder";
 import Navbar from "./component-library/navbar/navbar";
 import parse from "html-react-parser";
 import React from "react";
 import { Subject, Subscription } from "rxjs";
 import Primitives from "./component-library/primitive-components/primitives";
-import Modal from "./component-library/modal/modal";
 import { ILayout } from "./Types";
+import FormBuilder from "./component-library/form-builder/form-builder";
 
 function contextResolve(
   context: { [key: string]: Subject<any> },
@@ -52,7 +51,6 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
     this.layout = props.layout;
     this.style = props.style;
     this._context = props.context;
-    this.identifierKey = props.identifierKey || "name";
 
     this.state = {
       props: this.layout.props || {},
@@ -115,7 +113,7 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
         resolveClassNames(this.state.props.className, this.style) || "";
     }
     //Primitive elements
-    const tagName: string = get(this.layout, this.identifierKey);
+    const tagName: string = get(this.layout, "name");
     if (
       includes(["div", "p", "span", "img"], tagName) ||
       tagName.match(/^h[1-6]$/)
@@ -148,15 +146,6 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
           </a>
         );
       }
-    } else if (tagName === "form-builder" && this.identifierKey === "name") {
-      return (
-        <FormBuilder
-          action_buttons={this.state.props.action_buttons}
-          context={this._context}
-          fields={this.state.props.fields}
-          event_handler={events}
-        />
-      );
     } else if (tagName === "redirect") {
       return <Redirect to={this.state.props.to} />;
     } else if (tagName === "navbar") {
@@ -218,14 +207,13 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
           ) : null}
         </div>
       );
-    } else if (tagName === "modal") {
+    } else if (tagName === "form") {
       return (
-        <Modal
-          events={events}
+        <FormBuilder
           props={this.state.props}
-          style={this.style}
           context={this._context}
-          children={this.layout.children}
+          style={this.style}
+          event={events}
         />
       );
     }
