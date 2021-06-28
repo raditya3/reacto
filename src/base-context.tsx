@@ -100,7 +100,7 @@ class BaseComponent extends React.Component<IPropType, IStateConfig> {
         layout={this.config.layout}
         style={this.config.style}
         context={this.state.context}
-      />
+      > {this.props.children} </LayoutRenderer>
     );
   }
 }

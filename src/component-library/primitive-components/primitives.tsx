@@ -6,7 +6,8 @@ import parse from "html-react-parser";
 function Primitives(properts: {
   tagName: string;
   props: any;
-  children?: any[];
+  children_?: any[];
+  children?:any;
   style: any;
   context: { [key: string]: Subject<any> };
 }) {
@@ -19,7 +20,7 @@ function Primitives(properts: {
     get("className"),
     defaultTo("")
   )(props);
-  const _children = properts.children;
+  const _children = properts.children_;
 
   const [children, setChildren] = useState<any>();
   const [innerHTML, setInnerHTML] = useState<string>(_innerHTML);
@@ -29,7 +30,7 @@ function Primitives(properts: {
     setChildren(_children);
     if (!!_classNames) {
       setResolvedClassNames({
-        className: resolveClassNames(_classNames, properts.style),
+        className: resolveClassNames(_classNames, properts.style) || _classNames,
       });
     }
   }, [_innerHTML, _children, _classNames, properts.style]);
@@ -46,7 +47,7 @@ function Primitives(properts: {
                   style={style}
                   context={context}
                   key={index}
-                />
+                >{properts.children}</LayoutRenderer>
               );
             })
           : ""}

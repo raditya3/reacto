@@ -1,13 +1,15 @@
 ul {
   list-style-type: none;
+  margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 li {
   float: left;
-  margin: 0px 0.1rem;
-  text-transform: uppercase;
   text-align: center;
   width: fit-content;
+  height: 100%;
+  padding : 0.5rem;
 }
 
 .submenu {

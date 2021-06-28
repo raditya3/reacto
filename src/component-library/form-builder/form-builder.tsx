@@ -23,14 +23,14 @@ function FormBuilder(properts: IProps) {
   const [formValue, setFormValue] = useState<any>({});
   return (
     <form>
-      {properts.props.fields.map((field: fieldProps) => {
+      {properts.props.fields.map((field: fieldProps, index) => {
         if (
           field.type === "email" ||
           field.type === "text" ||
           field.type === "password"
         ) {
           return (
-            <div>
+            <div key={index}>
               <label htmlFor={field.name}>{field.label}</label>
               <br />
               <input
@@ -50,9 +50,10 @@ function FormBuilder(properts: IProps) {
         }
         return null;
       })}
-      {properts.props.action_buttons?.map((button: any) => {
+      {properts.props.action_buttons?.map((button: any, index) => {
         return (
           <button
+          key={index}
             title={button.label}
             onClick={() => {
               properts.event.forEach((evnt: any) => {

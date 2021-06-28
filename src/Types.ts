@@ -1,4 +1,4 @@
-interface IDerivedCalc {
+export interface IDerivedCalc {
     name: string,
     from: Array<string>,
     delayTime?: number,

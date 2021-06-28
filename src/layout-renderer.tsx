@@ -20,6 +20,7 @@ interface IProps {
   style: any;
   context: { [key: string]: Subject<any> };
   identifierKey?: string;
+  children? : any[];
 }
 
 interface IState {
@@ -118,15 +119,13 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
       includes(["div", "p", "span", "img"], tagName) ||
       tagName.match(/^h[1-6]$/)
     ) {
-      return (
-        <Primitives
+      return <Primitives
           context={this._context || {}}
           props={this.state.props}
           style={this.style}
           tagName={tagName}
-          children={this.layout.children}
-        />
-      );
+          children_={this.layout.children}
+        >{this.props.children}</Primitives>
       // Anchor element
     } else if (tagName === "a") {
       if (!!this.state.props.native) {
@@ -146,7 +145,7 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
           </a>
         );
       }
-    } else if (tagName === "redirect") {
+    } else if (tagName === "redirect" && !!this.state.props.isVisible) {
       return <Redirect to={this.state.props.to} />;
     } else if (tagName === "navbar") {
       //Navbar menu
@@ -216,6 +215,9 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
           event={events}
         />
       );
+    } else if(tagName==="router-outlet"){
+      return <>
+      {this.props.children}</>
     }
     return <div></div>;
   }

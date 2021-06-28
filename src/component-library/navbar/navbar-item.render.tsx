@@ -19,14 +19,13 @@ function ItemRender(props: {
   }
   return (
     <li
-      className={"hvr " + (props.labelClass ? props.labelClass : "")}
+      className={"hvr " + (props.labelClass ? props.labelClass : "") +" "+  (props.isActive && props.labelValue ? props.activeClass : "")}
       key={props.index}
     >
       <div
         {...liParams}
         className={
-          "label " +
-          (props.isActive && props.labelValue ? props.activeClass : "")
+          "label "
         }
       >
         {props.label}
