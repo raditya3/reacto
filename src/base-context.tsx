@@ -1,19 +1,16 @@
-import { get, set } from "lodash";
+import _, { get, set } from "lodash";
 import React from "react";
 import { Subject, Subscription } from "rxjs";
 import { delay, filter } from "rxjs/operators";
 import { IPageConfig } from "./Types";
 import { LayoutRenderer } from "./layout-renderer";
-
-interface IPropType {
-  config: IPageConfig;
-}
+import { withRouter } from 'react-router'
 
 interface IStateConfig {
   context: { [key: string]: Subject<any> };
 }
 
-class BaseComponent extends React.Component<IPropType, IStateConfig> {
+class BaseComponent extends React.Component<any, IStateConfig> {
   subsBag: Subscription[] = [];
   config: IPageConfig = this.props.config;
   contextVar: {
@@ -29,7 +26,7 @@ class BaseComponent extends React.Component<IPropType, IStateConfig> {
         set(this._context, item[0] + "$", new Subject());
       }
     });
-
+    set(this._context, "routeParams$", new Subject());
     this.config.contextProp.derivedSpec.forEach((item) => {
       if (!get(this._context, item.name + "$")) {
         set(this._context, item.name + "$", new Subject());
@@ -77,6 +74,7 @@ class BaseComponent extends React.Component<IPropType, IStateConfig> {
   }
 
   componentDidMount() {
+    const routeParams = this.props.match.params;
     this.config.contextProp.propConfig.forEach((item) => {
       const target: any = item[0];
       const propSub: Subject<any> = this._context[target + "$"];
@@ -86,6 +84,9 @@ class BaseComponent extends React.Component<IPropType, IStateConfig> {
         });
       }
     });
+    if(_.keys(routeParams).length>0){
+      this._context['routeParams$']?.next(routeParams);
+    }
   }
 
   componentWillUnmount() {
@@ -105,4 +106,4 @@ class BaseComponent extends React.Component<IPropType, IStateConfig> {
   }
 }
 
-export default BaseComponent;
+export default withRouter(BaseComponent);

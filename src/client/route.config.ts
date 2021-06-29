@@ -10,7 +10,11 @@ export const routeConfig : Array<RouteConfig> = [
         name: 'rootContainer',
         children: [
             {
-                path: 'laptop',
+                path : '',
+                name: '',
+            },
+            {
+                path: 'products/:id',
                 name: 'laptopPage'
             }
         ]

@@ -8,8 +8,18 @@ export const laptopPage : IPageConfig = {
         }
     },
     contextProp : {
-        derivedSpec : [],
-        propConfig : [],
+        derivedSpec : [
+            {
+                from: ['routeParams'],
+                name: '_xxx',
+                spec: function(data : any){
+                    console.log(data);
+                }
+            }
+        ],
+        propConfig : [
+            ['_xxx',null]
+        ],
     },
     style : null,
 }
