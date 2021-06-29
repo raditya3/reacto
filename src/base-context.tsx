@@ -26,6 +26,7 @@ class BaseComponent extends React.Component<any, IStateConfig> {
         set(this._context, item[0] + "$", new Subject());
       }
     });
+    set(this._context,"appContext$",this.props.appContext);
     set(this._context, "routeParams$", new Subject());
     this.config.contextProp.derivedSpec.forEach((item) => {
       if (!get(this._context, item.name + "$")) {
@@ -37,10 +38,14 @@ class BaseComponent extends React.Component<any, IStateConfig> {
             .pipe(
               delay(item.delayTime ? item.delayTime : 0),
               filter((val) => {
+                //Prevent feedback
+                if(item.name===v){
+                  return false;
+                }
                 if (!!item.filterFn) {
                   const filterData = {};
                   item.from.forEach((varName) => {
-                    const v1 = get(this.state.context, varName);
+                    const v1 = get(this.contextVar, varName);
                     set(filterData, varName, v1);
                   });
                   set(filterData, v, val);
@@ -56,13 +61,23 @@ class BaseComponent extends React.Component<any, IStateConfig> {
                 const v1 = get(this.contextVar, varName);
                 set(data, varName, v1);
               });
-              const calculatedValue = item.spec(data);
+              let calculatedValue = item.spec(data);
               set(this.contextVar, item.name, calculatedValue);
 
               if (!!get(this._context, item.name + "$")) {
+                if(item.name==='appContext'){
+                  if(typeof calculatedValue == 'object'){
+                    calculatedValue = Object.assign({},get(this.contextVar,'appContext') || {},calculatedValue);
+                    setTimeout(() => {
+                      get(this._context, item.name + "$").next(calculatedValue);
+                    });
+                  }
+                }
+                else {
                 setTimeout(() => {
                   get(this._context, item.name + "$").next(calculatedValue);
                 });
+                }
               }
             })
         );

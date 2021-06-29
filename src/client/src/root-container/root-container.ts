@@ -12,7 +12,7 @@ export const rootContainer : IPageConfig = {
             {
                 name: 'redirect',
                 props: {
-                    to: 'laptop',
+                    '[to]': 'redirectURL',
                     '[isVisible]' : 'triggerRedirect'
                 }
             },

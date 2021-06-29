@@ -1,3 +1,4 @@
+import get from "lodash/get";
 import { IPageConfig } from "../../../Types";
 
 export const laptopPage : IPageConfig = {
@@ -13,7 +14,7 @@ export const laptopPage : IPageConfig = {
                 from: ['routeParams'],
                 name: '_xxx',
                 spec: function(data : any){
-                    console.log(data);
+                    const productCategory = get(data,'routeParams.id');
                 }
             }
         ],
