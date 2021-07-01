@@ -4,7 +4,7 @@ import { Subject, Subscription } from "rxjs";
 import { delay, filter } from "rxjs/operators";
 import { IPageConfig } from "./Types";
 import { LayoutRenderer } from "./layout-renderer";
-import { withRouter } from 'react-router'
+import { withRouter } from "react-router";
 
 interface IStateConfig {
   context: { [key: string]: Subject<any> };
@@ -19,27 +19,30 @@ class BaseComponent extends React.Component<any, IStateConfig> {
   _context: { [key: string]: Subject<any> } = {};
   constructor(props: any) {
     super(props);
-
     this.config.contextProp.propConfig.forEach((item) => {
       set(this.contextVar, item[0], item[1]);
       if (!get(this._context, item[0] + "$")) {
         set(this._context, item[0] + "$", new Subject());
       }
     });
-    set(this._context,"appContext$",this.props.appContext);
+    set(this._context, "appContext$", this.props.appContext);
     set(this._context, "routeParams$", new Subject());
     this.config.contextProp.derivedSpec.forEach((item) => {
       if (!get(this._context, item.name + "$")) {
         set(this._context, item.name + "$", new Subject());
       }
       item.from.forEach((v) => {
+        if (!this._context[v + "$"]) {
+          console.error(`missing context prop for ${v}`);
+          return;
+        }
         this.subsBag.push(
           this._context[v + "$"]
             .pipe(
               delay(item.delayTime ? item.delayTime : 0),
               filter((val) => {
                 //Prevent feedback
-                if(item.name===v){
+                if (item.name === v) {
                   return false;
                 }
                 if (!!item.filterFn) {
@@ -65,18 +68,21 @@ class BaseComponent extends React.Component<any, IStateConfig> {
               set(this.contextVar, item.name, calculatedValue);
 
               if (!!get(this._context, item.name + "$")) {
-                if(item.name==='appContext'){
-                  if(typeof calculatedValue == 'object'){
-                    calculatedValue = Object.assign({},get(this.contextVar,'appContext') || {},calculatedValue);
+                if (item.name === "appContext") {
+                  if (typeof calculatedValue == "object") {
+                    calculatedValue = Object.assign(
+                      {},
+                      get(this.contextVar, "appContext") || {},
+                      calculatedValue
+                    );
                     setTimeout(() => {
                       get(this._context, item.name + "$").next(calculatedValue);
                     });
                   }
-                }
-                else {
-                setTimeout(() => {
-                  get(this._context, item.name + "$").next(calculatedValue);
-                });
+                } else {
+                  setTimeout(() => {
+                    get(this._context, item.name + "$").next(calculatedValue);
+                  });
                 }
               }
             })
@@ -99,8 +105,8 @@ class BaseComponent extends React.Component<any, IStateConfig> {
         });
       }
     });
-    if(_.keys(routeParams).length>0){
-      this._context['routeParams$']?.next(routeParams);
+    if (_.keys(routeParams).length > 0) {
+      this._context["routeParams$"]?.next(routeParams);
     }
   }
 
@@ -116,7 +122,10 @@ class BaseComponent extends React.Component<any, IStateConfig> {
         layout={this.config.layout}
         style={this.config.style}
         context={this.state.context}
-      > {this.props.children} </LayoutRenderer>
+      >
+        {" "}
+        {this.props.children}{" "}
+      </LayoutRenderer>
     );
   }
 }

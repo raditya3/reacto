@@ -1,3 +1,1 @@
-export const props : Array<[string, any]> = [
-    ['selectedNavItem',null],
-]
+export const props: Array<[string, any]> = [["selectedNavItem", null]];

@@ -1,4 +1,16 @@
-import { set, get, keys, trim, includes } from "lodash";
+import {
+  set,
+  get,
+  keys,
+  trim,
+  includes,
+  isArray,
+  cloneDeep,
+  map,
+  forEach,
+  split,
+  join,
+} from "lodash";
 import { Link, Redirect } from "react-router-dom";
 import Navbar from "./component-library/navbar/navbar";
 import parse from "html-react-parser";
@@ -12,7 +24,8 @@ function contextResolve(
   context: { [key: string]: Subject<any> },
   val: string
 ): Subject<any> {
-  return get(context, val + "$");
+  const objSplit = val.split(".");
+  return get(context, objSplit[0] + "$");
 }
 
 interface IProps {
@@ -20,7 +33,7 @@ interface IProps {
   style: any;
   context: { [key: string]: Subject<any> };
   identifierKey?: string;
-  children? : any[];
+  children?: any[];
 }
 
 interface IState {
@@ -68,6 +81,11 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
         if (!!propSub) {
           this.subsBag.push(
             propSub.subscribe((val) => {
+              const propSplit = split(get(this.layout.props, propKey), ".");
+              if (propSplit.length > 1) {
+                propSplit.shift();
+                val = get(val, join(propSplit, "."));
+              }
               const resolvedVal = val;
               const resolvedKey = propKey.substring(1, propKey.length - 1);
               this.setState((p: any) => {
@@ -88,7 +106,33 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
       if (propSub) {
         this.subsBag.push(
           propSub.subscribe((val) => {
-            this.setState({ loop: val });
+            if (!!isArray(val)) {
+              const loopSub: Subject<any>[] = [];
+              this.setState({
+                loop: map(val, (item) => {
+                  const loopConfig = cloneDeep(this._context) || {};
+                  const loopLayout = cloneDeep(this.layout);
+                  delete loopLayout.loop;
+                  loopLayout.props = cloneDeep(this.state.props);
+                  const sub = new Subject<any>();
+                  loopSub.push(sub);
+                  set(loopConfig, "this$", sub);
+                  return (
+                    <LayoutRenderer
+                      context={loopConfig}
+                      layout={loopLayout}
+                      style={this.style}
+                      children={this.props.children}
+                    />
+                  );
+                }),
+              });
+              forEach(loopSub, (item, index) => {
+                setTimeout(() => {
+                  item.next(val[index]);
+                });
+              });
+            }
           })
         );
       }
@@ -115,17 +159,24 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
     }
     //Primitive elements
     const tagName: string = get(this.layout, "name");
+    if (!!this.state.loop) {
+      return this.state.loop;
+    }
     if (
       includes(["div", "p", "span", "img"], tagName) ||
       tagName.match(/^h[1-6]$/)
     ) {
-      return <Primitives
+      return (
+        <Primitives
           context={this._context || {}}
           props={this.state.props}
           style={this.style}
           tagName={tagName}
           children_={this.layout.children}
-        >{this.props.children}</Primitives>
+        >
+          {this.props.children}
+        </Primitives>
+      );
       // Anchor element
     } else if (tagName === "a") {
       if (!!this.state.props.native) {
@@ -145,7 +196,12 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
           </a>
         );
       }
-    } else if (tagName === "redirect" && !!this.state.props.isVisible) {
+    } else if (
+      tagName === "redirect" &&
+      !!this.state.props.isVisible &&
+      this.state.props.to
+    ) {
+      console.log("redirect", this.state.props.to);
       return <Redirect to={this.state.props.to} />;
     } else if (tagName === "navbar") {
       //Navbar menu
@@ -215,9 +271,8 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
           event={events}
         />
       );
-    } else if(tagName==="router-outlet"){
-      return <>
-      {this.props.children}</>
+    } else if (tagName === "router-outlet") {
+      return <>{this.props.children}</>;
     }
     return <div></div>;
   }

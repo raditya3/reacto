@@ -58,7 +58,7 @@ function Navbar(properts: IProps) {
     });
   };
   return (
-    <ul className={navClass || 'navbar-container'}>
+    <ul className={navClass || "navbar-container"}>
       {items.map((item, index: number) => {
         return (
           <ItemRender

@@ -1,0 +1,38 @@
+{
+  "laptops": {
+    "data": [
+      {
+        "id": 1,
+        "model": "G3 3500",
+        "spec": {
+          "manufacturer": "DELL",
+          "processor": "Intel i5 10300H",
+          "graphic_card": "Nvidia 1650 Ti"
+        },
+        "img": "https://images-na.ssl-images-amazon.com/images/I/61s0UA4pmVL._SL1000_.jpg"
+      },
+      {
+        "id": 2,
+        "model": "Alienware m15",
+        "spec": {
+          "manufacturer": "DELL",
+          "processor": "Intel i7 11300H",
+          "graphic_card": "Nvidia 3060"
+        },
+        "img": "https://i.dell.com/is/image/DellContent//content/dam/global-site-design/product_images/dell_client_products/notebooks/alienware_notebooks/alienware_m15_r3/pdp/alienware-m15-r3-laptop-pdp.png?fmt=jpg"
+      }
+    ],
+    "header": "Laptops"
+  },
+  "mobile_phones": {
+    "data": [
+      {
+        "id": 1,
+        "model": "7 plus",
+        "manufacturer": "Nokia",
+        "img": "https://fdn2.gsmarena.com/vv/pics/nokia/nokia-7-plus-1.jpg"
+      }
+    ],
+    "header": "Mobile Phones"
+  }
+}

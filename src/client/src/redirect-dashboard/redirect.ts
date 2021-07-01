@@ -1,10 +1,11 @@
 import { IPageConfig } from "../../../Types";
 
-export const dashboardPage: IPageConfig = {
+export const redirectDashboard: IPageConfig = {
   layout: {
-    name: "div",
+    name: "redirect",
     props: {
-      innerHTML: "Hello World",
+      to: "dashboard",
+      isVisible: true,
     },
   },
   contextProp: {

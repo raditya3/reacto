@@ -7,7 +7,7 @@ function Primitives(properts: {
   tagName: string;
   props: any;
   children_?: any[];
-  children?:any;
+  children?: any;
   style: any;
   context: { [key: string]: Subject<any> };
 }) {
@@ -21,7 +21,6 @@ function Primitives(properts: {
     defaultTo("")
   )(props);
   const _children = properts.children_;
-
   const [children, setChildren] = useState<any>();
   const [innerHTML, setInnerHTML] = useState<string>(_innerHTML);
   const [resolvedClassNamesObj, setResolvedClassNames] = useState<any>({});
@@ -30,11 +29,11 @@ function Primitives(properts: {
     setChildren(_children);
     if (!!_classNames) {
       setResolvedClassNames({
-        className: resolveClassNames(_classNames, properts.style) || _classNames,
+        className:
+          resolveClassNames(_classNames, properts.style) || _classNames,
       });
     }
   }, [_innerHTML, _children, _classNames, properts.style]);
-
   if (tagName === "div") {
     return (
       <div {...resolvedClassNamesObj}>
@@ -47,7 +46,9 @@ function Primitives(properts: {
                   style={style}
                   context={context}
                   key={index}
-                >{properts.children}</LayoutRenderer>
+                >
+                  {properts.children}
+                </LayoutRenderer>
               );
             })
           : ""}

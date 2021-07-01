@@ -53,7 +53,7 @@ function FormBuilder(properts: IProps) {
       {properts.props.action_buttons?.map((button: any, index) => {
         return (
           <button
-          key={index}
+            key={index}
             title={button.label}
             onClick={() => {
               properts.event.forEach((evnt: any) => {
