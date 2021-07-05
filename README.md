@@ -18,7 +18,6 @@ Note : require nodejs ^15
 # Todo
 
 ## framework task
- - [ ] Mercury
  - [x] Add loop injection                
  - [ ] Add global app context injector
  - [ ] Add dialog injector
@@ -26,12 +25,11 @@ Note : require nodejs ^15
 ## implementation task
 
 - [ ] Add main body
-- [ ] implement cards components
+- [ ] Implement cards components
 
 ## Long term goals
 
-- [ ] implement auto component injector in layout rendering
-- [ ] implement dynamic 3rd party component integration
-- [ ] it needs a global authentication handling
-- [ ] Needs profiling and optimizations
-- [ ] add necessary documentations for custom components
+- [ ] Implement auto component injector in layout rendering
+- [ ] Implement dynamic 3rd party component integration
+- [ ] Implement global authentication handling
+- [ ] Profiling and optimizations
