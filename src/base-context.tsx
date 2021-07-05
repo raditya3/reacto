@@ -95,7 +95,6 @@ class BaseComponent extends React.Component<any, IStateConfig> {
   }
 
   componentDidMount() {
-    const routeParams = this.props.match.params;
     this.config.contextProp.propConfig.forEach((item) => {
       const target: any = item[0];
       const propSub: Subject<any> = this._context[target + "$"];
@@ -105,6 +104,14 @@ class BaseComponent extends React.Component<any, IStateConfig> {
         });
       }
     });
+    const routeParams = this.props.match.params;
+    if (_.keys(routeParams).length > 0) {
+      this._context["routeParams$"]?.next(routeParams);
+    }
+  }
+
+  componentDidUpdate() {
+    const routeParams = this.props.match.params;
     if (_.keys(routeParams).length > 0) {
       this._context["routeParams$"]?.next(routeParams);
     }
@@ -123,7 +130,6 @@ class BaseComponent extends React.Component<any, IStateConfig> {
         style={this.config.style}
         context={this.state.context}
       >
-        {" "}
         {this.props.children}{" "}
       </LayoutRenderer>
     );

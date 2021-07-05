@@ -4,12 +4,11 @@ import {
   keys,
   trim,
   includes,
+  split,
+  join,
   isArray,
   cloneDeep,
   map,
-  forEach,
-  split,
-  join,
 } from "lodash";
 import { Link, Redirect } from "react-router-dom";
 import Navbar from "./component-library/navbar/navbar";
@@ -19,6 +18,8 @@ import { Subject, Subscription } from "rxjs";
 import Primitives from "./component-library/primitive-components/primitives";
 import { ILayout } from "./Types";
 import FormBuilder from "./component-library/form-builder/form-builder";
+import { createRef } from "react";
+import { RefObject } from "react";
 
 function contextResolve(
   context: { [key: string]: Subject<any> },
@@ -38,7 +39,8 @@ interface IProps {
 
 interface IState {
   props: any;
-  loop?: any;
+  loopRender?: any[];
+  loopVal?: any[];
 }
 
 export function resolveClassNames(
@@ -55,11 +57,11 @@ export function resolveClassNames(
 }
 
 export class LayoutRenderer extends React.Component<IProps, IState> {
-  layout: any = null;
+  layout: ILayout;
   style = null;
   _context: { [key: string]: Subject<any> } | null = null;
   identifierKey = "name";
-
+  loopChildRefBag: RefObject<any>[] = [];
   constructor(props: IProps) {
     super(props);
     this.layout = props.layout;
@@ -70,72 +72,111 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
       props: this.layout.props || {},
     };
   }
-
   componentDidMount() {
-    keys(this.layout.props).forEach((propKey) => {
-      if (propKey.match(/^\[+\w+\]$/)) {
-        const propSub: Subject<any> = contextResolve(
-          this._context || {},
-          get(this.layout.props, propKey)
-        );
-        if (!!propSub) {
-          this.subsBag.push(
-            propSub.subscribe((val) => {
-              const propSplit = split(get(this.layout.props, propKey), ".");
-              if (propSplit.length > 1) {
-                propSplit.shift();
-                val = get(val, join(propSplit, "."));
-              }
-              const resolvedVal = val;
-              const resolvedKey = propKey.substring(1, propKey.length - 1);
-              this.setState((p: any) => {
-                set(p.props, resolvedKey, resolvedVal);
-                delete p.props.propKey;
-                return p;
-              });
-            })
-          );
-        }
-      }
-    });
-    if (this.layout.loop) {
-      const propSub: Subject<any> = contextResolve(
-        this._context || {},
-        this.layout.loop
+    if (!!this.layout.loop) {
+      const loopVariableSubject: Subject<any> | undefined = get(
+        this._context,
+        this.layout.loop + "$"
       );
-      if (propSub) {
+      if (!!loopVariableSubject) {
         this.subsBag.push(
-          propSub.subscribe((val) => {
-            if (!!isArray(val)) {
-              const loopSub: Subject<any>[] = [];
+          loopVariableSubject.subscribe((val) => {
+            if (!isArray(val)) return;
+            this.loopChildRefBag = [];
+            setTimeout(() => {
               this.setState({
-                loop: map(val, (item) => {
-                  const loopConfig = cloneDeep(this._context) || {};
-                  const loopLayout = cloneDeep(this.layout);
-                  delete loopLayout.loop;
-                  loopLayout.props = cloneDeep(this.state.props);
-                  const sub = new Subject<any>();
-                  loopSub.push(sub);
-                  set(loopConfig, "this$", sub);
-                  return (
+                loopRender: map(val, (item, index) => {
+                  const clonedlayout = cloneDeep(this.layout);
+                  delete this.layout.loop;
+                  const clonedContext = cloneDeep(this._context) || {};
+                  const tmpRef = createRef<any>();
+                  set(clonedContext, "this$", new Subject<any>());
+                  const render = (
                     <LayoutRenderer
-                      context={loopConfig}
-                      layout={loopLayout}
+                      ref={tmpRef}
+                      context={clonedContext}
+                      layout={clonedlayout}
                       style={this.style}
-                      children={this.props.children}
-                    />
+                      key={index}
+                    >
+                      {this.props.children}
+                    </LayoutRenderer>
                   );
+                  this.loopChildRefBag.push(tmpRef);
+                  return render;
                 }),
+                loopVal: val,
               });
-              forEach(loopSub, (item, index) => {
-                setTimeout(() => {
-                  item.next(val[index]);
-                });
-              });
-            }
+            });
           })
         );
       }
+    } else {
+      this.setState({
+        loopRender: undefined,
+        loopVal: undefined,
+      });
+    }
+
+    if (!!this.layout.loop || !!this.state.loopVal) {
+      return;
+    }
+    keys(this.layout.props).forEach((propKey) => {
+      if (propKey.match(/^\[+[\w.]+\]$/)) {
+        const rawPropValue: string = get(this.layout.props, propKey);
+        const templateProps = rawPropValue.match(/\$\([\w.]+\)/g);
+        if (!!templateProps) {
+          const contextValueHolder = {};
+          templateProps.forEach((rawProp) => {
+            rawProp = rawProp.substring(2, rawProp.length - 1);
+            const propSub = contextResolve(this._context || {}, rawProp);
+            if (!!!propSub) {
+              return;
+            }
+            this.subsBag.push(
+              propSub.subscribe((val) => {
+                const tmppropVal = this.layout.props[propKey] || "";
+                const propSplit = split(
+                  tmppropVal.substring(2, tmppropVal.length - 1),
+                  "."
+                );
+                if (propSplit.length > 1) {
+                  propSplit.shift();
+                  val = get(val, join(propSplit, "."));
+                }
+                set(contextValueHolder, rawProp, val);
+                let resolvedVal = rawPropValue;
+                templateProps.forEach((uprp) => {
+                  const val = get(
+                    contextValueHolder,
+                    uprp.substring(2, uprp.length - 1)
+                  ); //unprocessed raw prop
+                  resolvedVal = resolvedVal.replace(uprp, val || "");
+                });
+
+                const resolvedKey = propKey.substring(1, propKey.length - 1);
+                this.setState((p: any) => {
+                  set(p.props, resolvedKey, resolvedVal);
+                  return p;
+                });
+              })
+            );
+          });
+        }
+      }
+    });
+  }
+
+  componentDidUpdate() {
+    if (this.loopChildRefBag.length > 0) {
+      this.loopChildRefBag.forEach((ref, index) => {
+        const v = get(this.state.loopVal, `[${index}]`);
+        if (typeof v !== "undefined" && !!ref.current._context) {
+          setTimeout(() => {
+            ref.current?._context.this$.next(v);
+          });
+        }
+      });
     }
   }
 
@@ -148,6 +189,10 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
   }
 
   render() {
+    if (!!this.state.loopRender) {
+      return <>{this.state.loopRender}</>;
+    }
+
     const events = get(this.props.layout, "events");
     if (this.state.props.isVisible === false) {
       return null;
@@ -159,11 +204,8 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
     }
     //Primitive elements
     const tagName: string = get(this.layout, "name");
-    if (!!this.state.loop) {
-      return this.state.loop;
-    }
     if (
-      includes(["div", "p", "span", "img"], tagName) ||
+      includes(["div", "p", "span", "img", "ul", "li"], tagName) ||
       tagName.match(/^h[1-6]$/)
     ) {
       return (
@@ -199,9 +241,8 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
     } else if (
       tagName === "redirect" &&
       !!this.state.props.isVisible &&
-      this.state.props.to
+      !!this.state.props.to
     ) {
-      console.log("redirect", this.state.props.to);
       return <Redirect to={this.state.props.to} />;
     } else if (tagName === "navbar") {
       //Navbar menu
@@ -234,33 +275,6 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
           style={this.style}
           event={events}
         />
-      );
-    } else if (tagName === "text") {
-      const inputProps = {
-        name: this.layout.name,
-        type: this.state.props.type || "text",
-        onChange: (_event: any) => {
-          this.state.props.onChange_handler(this.layout, _event);
-        },
-        onClick: (event: any) => {
-          this.state.props.fieldTouched_handler(this.layout);
-        },
-      };
-      if (!!this.state.props.autocomplete) {
-        set(inputProps, "autoComplete", this.state.props.autocomplete);
-      }
-      return (
-        <div>
-          <label>{this.layout.label}</label>
-          <br />
-          <input {...inputProps} />
-          {!!this.state.props.validationMsg ? (
-            <span style={{ color: "red" }}>
-              {" "}
-              {this.state.props.validationMsg}{" "}
-            </span>
-          ) : null}
-        </div>
       );
     } else if (tagName === "form") {
       return (

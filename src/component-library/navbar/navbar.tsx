@@ -65,7 +65,7 @@ function Navbar(properts: IProps) {
             key={index}
             label={item.label}
             selectHandler={selectHandler}
-            isActive={index === activeTab}
+            isActive={item.value === activeTab}
             index={index}
             labelValue={item.value}
             subMenu={item.submenu}

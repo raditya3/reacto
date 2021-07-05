@@ -2,7 +2,40 @@ export const listingLayout = {
   name: "div",
   props: {
     className: "list-item",
-    "[innerHTML]": "this.model",
   },
+  children: [
+    {
+      name: "img",
+      props: {
+        "[src]": "$(this.img)",
+        className: "item-img",
+      },
+    },
+    {
+      name: "div",
+      props: {
+        className: "info-container",
+      },
+      children: [
+        {
+          name: "h1",
+          props: {
+            "[innerHTML]": "$(this.model)",
+          },
+        },
+        {
+          name: "ul",
+          children: [
+            {
+              name: "li",
+              props: {
+                "[innerHTML]": "Manufacturer : $(this.spec.manufacturer)",
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
   loop: "itemList",
 };

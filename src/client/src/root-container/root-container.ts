@@ -12,8 +12,8 @@ export const rootContainer: IPageConfig = {
       {
         name: "redirect",
         props: {
-          "[to]": "redirectURL",
-          "[isVisible]": "triggerRedirect",
+          "[to]": "$(redirectURL)",
+          "[isVisible]": "$(triggerRedirect)",
         },
       },
       headerLayout,

@@ -13,6 +13,9 @@ export const categoryPage: IPageConfig = {
       headerLayout,
       {
         name: "div",
+        props: {
+          className: "list-container",
+        },
         children: [listingLayout],
       },
     ],

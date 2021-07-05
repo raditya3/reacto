@@ -6,8 +6,8 @@ import parse from "html-react-parser";
 function Primitives(properts: {
   tagName: string;
   props: any;
-  children_?: any[];
-  children?: any;
+  children_?: any[]; //JSON children
+  children?: any; //JSX children          Can we combine the two?
   style: any;
   context: { [key: string]: Subject<any> };
 }) {
@@ -80,11 +80,35 @@ function Primitives(properts: {
     );
   } else if (tagName === "img") {
     let imgProps = {
-      src: props.img.default,
-      alt: props.alt || "",
+      ...(props.src && { src: props.src }),
+      ...(props.alt && { alt: props.alt }),
     };
     // eslint-disable-next-line jsx-a11y/alt-text
     return <img {...resolvedClassNamesObj} {...imgProps} />;
+  } else if (tagName === "ul") {
+    return (
+      <ul {...resolvedClassNamesObj}>
+        {children
+          ? children.map((item: any, index: number) => {
+              return (
+                <LayoutRenderer
+                  layout={item}
+                  style={style}
+                  context={context}
+                  key={index}
+                />
+              );
+            })
+          : null}
+      </ul>
+    );
+  } else if (tagName === "li") {
+    return (
+      <li {...resolvedClassNamesObj}>
+        {" "}
+        {innerHTML ? parse(innerHTML) : null}{" "}
+      </li>
+    );
   }
   return null;
 }

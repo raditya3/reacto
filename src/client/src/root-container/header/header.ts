@@ -37,7 +37,7 @@ export const headerLayout = {
           props: {
             items: navbarOptions,
             labelClass: "navbar-item",
-            activeTab: 0,
+            "[activeTab]": "$(activeTab)",
             activeClass: "navbar-item-active",
           },
           events: [

@@ -11,6 +11,7 @@ export interface ILayout {
   props?: any;
   children?: ILayout[];
   events?: any;
+  loop?: string;
 }
 
 export interface IPageConfig {

@@ -1,10 +1,13 @@
 import { IDerivedCalc } from "../../../../Types";
 export const derived: IDerivedCalc[] = [
   {
-    name: "_xxx",
-    from: ["selectedNavItem"],
+    name: "activeTab",
+    from: ["routeParams", "listingData"],
     spec: function (data: any) {
-      return data;
+      if (!data.routeParams?.id) {
+        return "home";
+      }
+      return data.routeParams.id;
     },
   },
   {
