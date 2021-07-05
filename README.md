@@ -1,6 +1,6 @@
 # reacto
 
-A new reactiveX framework for react
+A new reactiveX render engine for react
 
 ## Setup
 
