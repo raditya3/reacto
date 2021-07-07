@@ -18,9 +18,10 @@ Note : require nodejs ^15
 # Todo
 
 ## framework task
- - [x] Add loop injection                
- - [ ] Add global app context injector
- - [ ] Add dialog injector
+
+- [x] Add loop injection
+- [ ] Add global app context injector
+- [ ] Add dialog injector
 
 ## implementation task
 

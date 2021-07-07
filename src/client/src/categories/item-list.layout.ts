@@ -29,6 +29,7 @@ export const listingLayout = {
             {
               name: "li",
               props: {
+                "[isVisible]": "$(this.spec.manufacturer)",
                 "[innerHTML]": "Manufacturer : $(this.spec.manufacturer)",
               },
             },

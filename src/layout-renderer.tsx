@@ -40,7 +40,6 @@ interface IProps {
 interface IState {
   props: any;
   loopRender?: any[];
-  loopVal?: any[];
 }
 
 export function resolveClassNames(
@@ -87,7 +86,7 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
               this.setState({
                 loopRender: map(val, (item, index) => {
                   const clonedlayout = cloneDeep(this.layout);
-                  delete this.layout.loop;
+                  delete clonedlayout.loop;
                   const clonedContext = cloneDeep(this._context) || {};
                   const tmpRef = createRef<any>();
                   set(clonedContext, "this$", new Subject<any>());
@@ -102,10 +101,11 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
                       {this.props.children}
                     </LayoutRenderer>
                   );
-                  this.loopChildRefBag.push(tmpRef);
+                  setTimeout(() => {
+                    tmpRef.current?._context.this$.next(item);
+                  });
                   return render;
                 }),
-                loopVal: val,
               });
             });
           })
@@ -114,11 +114,10 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
     } else {
       this.setState({
         loopRender: undefined,
-        loopVal: undefined,
       });
     }
 
-    if (!!this.layout.loop || !!this.state.loopVal) {
+    if (!!this.layout.loop) {
       return;
     }
     keys(this.layout.props).forEach((propKey) => {
@@ -153,7 +152,6 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
                   ); //unprocessed raw prop
                   resolvedVal = resolvedVal.replace(uprp, val || "");
                 });
-
                 const resolvedKey = propKey.substring(1, propKey.length - 1);
                 this.setState((p: any) => {
                   set(p.props, resolvedKey, resolvedVal);
@@ -165,19 +163,6 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
         }
       }
     });
-  }
-
-  componentDidUpdate() {
-    if (this.loopChildRefBag.length > 0) {
-      this.loopChildRefBag.forEach((ref, index) => {
-        const v = get(this.state.loopVal, `[${index}]`);
-        if (typeof v !== "undefined" && !!ref.current._context) {
-          setTimeout(() => {
-            ref.current?._context.this$.next(v);
-          });
-        }
-      });
-    }
   }
 
   subsBag: Subscription[] = [];
@@ -194,7 +179,10 @@ export class LayoutRenderer extends React.Component<IProps, IState> {
     }
 
     const events = get(this.props.layout, "events");
-    if (this.state.props.isVisible === false) {
+    if (
+      this.state.props.isVisible === false ||
+      this.state.props.isVisible === ""
+    ) {
       return null;
     }
     let resolvedClassName = "";

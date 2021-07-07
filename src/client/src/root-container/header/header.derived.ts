@@ -27,6 +27,9 @@ export const derived: IDerivedCalc[] = [
       return !!data.selectedNavItem;
     },
     spec: function (data: any) {
+      if (data.selectedNavItem === "home") {
+        return "/dashboard";
+      }
       return "/products/" + data.selectedNavItem;
     },
   },
